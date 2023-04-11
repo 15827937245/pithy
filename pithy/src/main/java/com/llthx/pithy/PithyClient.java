@@ -3,6 +3,7 @@ package com.llthx.pithy;
 import com.llthx.llog.LLog;
 import com.llthx.pithy.event.PithyEventCallback;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +19,8 @@ public class PithyClient {
             synchronized (mLock) {
                 if (mInstance == null) {
                     mInstance = new PithyClient();
+
+                    LLog.setALL(true);
                 }
             }
         }
@@ -37,6 +40,10 @@ public class PithyClient {
     public boolean register(PithyPrototype pithyPrototype, PithyThread pithyThread) {
         LLog.d(TAG,"register(), eventKey : " + pithyPrototype.getEventKey() + " , pithyThread : " + pithyThread.getPithyThreadName());
 
+        if (!pithyThread.isInit()) {
+            pithyThread.init();
+        }
+
         return pithyThread.putEvent(pithyPrototype);
     }
 
@@ -45,6 +52,14 @@ public class PithyClient {
     }
 
     public boolean unRegister(String TAG, String key, PithyThread pithyThread) {
+        if (!pithyThread.isInit()) {
+            LLog.e(this.TAG,"unRegister(), " + pithyThread.getPithyThreadName() + "is not init!");
+
+            return false;
+        }
+
+        LLog.d(TAG,"unRegister(), eventKey : " + PithyPrototype.generateEventKey(TAG, key) + " , pithyThread : " + pithyThread.getPithyThreadName());
+
         return pithyThread.removeEvent(TAG, key);
     }
 
@@ -53,6 +68,14 @@ public class PithyClient {
     }
 
     public boolean unRegister(String TAG, PithyThread pithyThread) {
+        if (!pithyThread.isInit()) {
+            LLog.e(this.TAG,"unRegister(), " + pithyThread.getPithyThreadName() + "is not init!");
+
+            return false;
+        }
+
+        LLog.d(TAG,"unRegister(), TAG : " + TAG + " , pithyThread : " + pithyThread.getPithyThreadName());
+
         return pithyThread.removeAllTagEvent(TAG);
     }
 
@@ -61,6 +84,12 @@ public class PithyClient {
     };
 
     public void unRegisterAllEvent(PithyThread pithyThread) {
+        if (!pithyThread.isInit()) {
+            LLog.e(TAG,"unRegisterAllEvent(), " + pithyThread.getPithyThreadName() + "is not init!");
+
+            return;
+        }
+
         LLog.d(TAG,"unRegisterAllEvent()");
 
         pithyThread.removeAllEvent();
@@ -71,6 +100,12 @@ public class PithyClient {
     };
 
     public String[] dumpAllEvent(PithyThread pithyThread) {
+        if (!pithyThread.isInit()) {
+            LLog.e(TAG,"dumpAllEvent(), " + pithyThread.getPithyThreadName() + "is not init!");
+
+            return null;
+        }
+
         LLog.d(TAG,"dumpAllEvent(), pithyThreadName: " + pithyThread.getPithyThreadName());
 
         return pithyThread.dumpAllEvent();
@@ -83,12 +118,31 @@ public class PithyClient {
     public String[] dumpAllThreadTAGEvent(String TAG) {
         LLog.d(this.TAG,"dumpAllThreadTAGEvent(), TAG : " + TAG);
 
-        String[] MAIN_THREAD = PithyThread.MAIN_THREAD.dumpAllTagEvent(TAG);
-        String[] NORMAL_THREAD = PithyThread.NORMAL_THREAD.dumpAllTagEvent(TAG);
-        String[] ASYNC_THREAD = PithyThread.ASYNC_THREAD.dumpAllTagEvent(TAG);
-        List<String> list = Arrays.asList(MAIN_THREAD);
-        list.addAll(Arrays.asList(NORMAL_THREAD));
-        list.addAll(Arrays.asList(ASYNC_THREAD));
+        List<String> list = new ArrayList<>();
+
+        if (PithyThread.MAIN_THREAD.isInit()) {
+            List MAIN_THREAD = Arrays.asList(PithyThread.MAIN_THREAD.dumpAllTagEvent(TAG));
+
+            if (!MAIN_THREAD.isEmpty()) {
+                list.addAll(MAIN_THREAD);
+            }
+        }
+
+        if (PithyThread.NORMAL_THREAD.isInit()) {
+            List NORMAL_THREAD = Arrays.asList(PithyThread.NORMAL_THREAD.dumpAllTagEvent(TAG));
+
+            if (!NORMAL_THREAD.isEmpty()) {
+                list.addAll(NORMAL_THREAD);
+            }
+        }
+
+        if (PithyThread.ASYNC_THREAD.isInit()) {
+            List ASYNC_THREAD = Arrays.asList(PithyThread.ASYNC_THREAD.dumpAllTagEvent(TAG));
+
+            if (!ASYNC_THREAD.isEmpty()) {
+                list.addAll(ASYNC_THREAD);
+            }
+        }
 
         return (String[]) list.toArray();
     };
@@ -96,22 +150,46 @@ public class PithyClient {
     public String[] dumpAllThreadEvent() {
         LLog.d(TAG,"dumpAllThreadEvent()");
 
-        String[] MAIN_THREAD = PithyThread.MAIN_THREAD.dumpAllEvent();
-        String[] NORMAL_THREAD = PithyThread.NORMAL_THREAD.dumpAllEvent();
-        String[] ASYNC_THREAD = PithyThread.ASYNC_THREAD.dumpAllEvent();
+        List<String> list = new ArrayList<>();
 
-        List<String> list = Arrays.asList(MAIN_THREAD);
-        list.addAll(Arrays.asList(NORMAL_THREAD));
-        list.addAll(Arrays.asList(ASYNC_THREAD));
+        if (PithyThread.MAIN_THREAD.isInit()) {
+            List MAIN_THREAD = Arrays.asList(PithyThread.MAIN_THREAD.dumpAllTagEvent(TAG));
+
+            if (!MAIN_THREAD.isEmpty()) {
+                list.addAll(MAIN_THREAD);
+            }
+        }
+
+        if (PithyThread.NORMAL_THREAD.isInit()) {
+            List NORMAL_THREAD = Arrays.asList(PithyThread.NORMAL_THREAD.dumpAllTagEvent(TAG));
+
+            if (!NORMAL_THREAD.isEmpty()) {
+                list.addAll(NORMAL_THREAD);
+            }
+        }
+
+        if (PithyThread.ASYNC_THREAD.isInit()) {
+            List ASYNC_THREAD = Arrays.asList(PithyThread.ASYNC_THREAD.dumpAllTagEvent(TAG));
+
+            if (!ASYNC_THREAD.isEmpty()) {
+                list.addAll(ASYNC_THREAD);
+            }
+        }
 
         return (String[]) list.toArray();
     };
 
     public void post(String TAG, String key){
-
+        post(TAG, key, PithyThread.MAIN_THREAD);
     }
 
     public void post(String TAG, String key, PithyThread pithyThread){
+        if (!pithyThread.isInit()) {
+            LLog.e(this.TAG,"post(), " + pithyThread.getPithyThreadName() + "is not init!");
+
+            return;
+        }
+
         pithyThread.post(TAG, key);
     }
 }

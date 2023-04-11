@@ -19,8 +19,8 @@ public enum PithyThread {
 
         @Override
         public void init() {
-            super.init();
             handler = new Handler(Looper.myLooper());
+            super.init();
         }
     },
     NORMAL_THREAD{
@@ -29,10 +29,10 @@ public enum PithyThread {
 
         @Override
         public void init() {
-            super.init();
             handlerThread = new HandlerThread(TAG);
             handlerThread.start();
             handler = new Handler(handlerThread.getLooper());
+            super.init();
         }
 
         @Override
@@ -46,12 +46,12 @@ public enum PithyThread {
 
         @Override
         public void init() {
-            super.init();
             ThreadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+            super.init();
         }
 
         @Override
-        public void post(String TAG, String key) {
+        protected void post(String TAG, String key) {
             LLog.d(this.TAG,"post , TAG : " + TAG + ", key : " + key);
 
             String eventKey = PithyPrototype.generateEventKey(TAG,key);
@@ -80,6 +80,7 @@ public enum PithyThread {
     private String TAG = "PithyThread";
 
     protected Handler handler;
+    private boolean mbIsInit = false;
 
     protected boolean putEvent(PithyPrototype pithyPrototype) {
         String eventKey = pithyPrototype.getEventKey();
@@ -195,7 +196,13 @@ public enum PithyThread {
         return "MAIN_THREAD";
     }
 
-    public void init(){
+    protected void init(){
         LLog.d(this.TAG,"init()");
+
+        mbIsInit = true;
     };
+
+    public boolean isInit() {
+        return mbIsInit;
+    }
 }
