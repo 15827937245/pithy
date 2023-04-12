@@ -37,6 +37,22 @@ public class PithyClient {
         return register(new PithyPrototype(TAG, key, callback), pithyThread);
     }
 
+    public boolean register(String eventKey, PithyEventCallback callback) {
+        return register(eventKey, callback, PithyThread.MAIN_THREAD);
+    }
+
+    public boolean register(String eventKey, PithyEventCallback callback, PithyThread pithyThread) {
+        PithyPrototype pithyPrototype = null;
+
+        try {
+            pithyPrototype = new PithyPrototype(eventKey, callback);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return register(pithyPrototype,pithyThread);
+    }
+
     public boolean register(PithyPrototype pithyPrototype, PithyThread pithyThread) {
         LLog.d(TAG,"register(), eventKey : " + pithyPrototype.getEventKey() + " , pithyThread : " + pithyThread.getPithyThreadName());
 
@@ -183,13 +199,21 @@ public class PithyClient {
         post(TAG, key, PithyThread.MAIN_THREAD);
     }
 
+    public void post(String TAG, String key, String jsonData){
+        post(TAG, key, jsonData, PithyThread.MAIN_THREAD);
+    }
+
     public void post(String TAG, String key, PithyThread pithyThread){
+        post(TAG, key,null, pithyThread);
+    }
+
+    public void post(String TAG, String key, String jsonData, PithyThread pithyThread){
         if (!pithyThread.isInit()) {
             LLog.e(this.TAG,"post(), " + pithyThread.getPithyThreadName() + "is not init!");
 
             return;
         }
 
-        pithyThread.post(TAG, key);
+        pithyThread.post(TAG, key, jsonData);
     }
 }

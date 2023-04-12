@@ -9,8 +9,12 @@ import android.widget.Toast;
 
 import com.llthx.pithy.event.PithyEventCallback;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity implements PithyEventCallback {
     public String TAG = "MainActivity";
+    public int onClickNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,15 +24,29 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
     }
 
     @Override
-    public void pithyEventCallback() {
-        Toast.makeText(this,"pithyEventCallback",Toast.LENGTH_SHORT).show();
+    public void pithyEventCallback(String jonsDate) {
+        try {
+            JSONObject data = new JSONObject(jonsDate);
+            int onClickNumber = (int) data.get("onClickNumber");
+            Toast.makeText(this,"pithyEventCallback, onClickNumber : " + onClickNumber,Toast.LENGTH_SHORT).show();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     public void testOnclick(View view) {
         Log.v(TAG,"testOnclick()");
+        onClickNumber++;
+        JSONObject jsonObject = new JSONObject();
 
-        PithyClient.getInstance().post(TAG,"testOnclick");
+        try {
+            jsonObject.put("onClickNumber",onClickNumber);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        PithyClient.getInstance().post(TAG,"testOnclick", jsonObject.toString());
     }
 
     @Override

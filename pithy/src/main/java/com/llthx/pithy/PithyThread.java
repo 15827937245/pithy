@@ -51,7 +51,7 @@ public enum PithyThread {
         }
 
         @Override
-        protected void post(String TAG, String key) {
+        protected void post(String TAG, String key, String jsonData) {
             LLog.d(this.TAG,"post , TAG : " + TAG + ", key : " + key);
 
             String eventKey = PithyPrototype.generateEventKey(TAG,key);
@@ -61,7 +61,7 @@ public enum PithyThread {
                 PithyPrototype pithyPrototype =(PithyPrototype) map.get(eventKey);
 
                 if (null != ThreadPool) {
-                    ThreadPool.execute(()-> pithyPrototype.getCallback().pithyEventCallback());
+                    ThreadPool.execute(()-> pithyPrototype.getCallback().pithyEventCallback(jsonData));
                 } else {
                     LLog.e(this.TAG,"post() , eventKey does not exist!");
                 }
@@ -172,7 +172,7 @@ public enum PithyThread {
         return (String[]) list.toArray();
     };
 
-    protected void post(String TAG, String key) {
+    protected void post(String TAG, String key, String jsonData) {
         LLog.d(this.TAG,"post , TAG : " + TAG + ", key : " + key);
 
         String eventKey = PithyPrototype.generateEventKey(TAG,key);
@@ -183,7 +183,7 @@ public enum PithyThread {
             PithyPrototype pithyPrototype = (PithyPrototype) map.get(eventKey);
 
             if (null != handler) {
-                handler.post(()-> pithyPrototype.getCallback().pithyEventCallback());
+                handler.post(()-> pithyPrototype.getCallback().pithyEventCallback(jsonData));
             } else {
                 LLog.e(this.TAG,"post() , handler is null!");
             }

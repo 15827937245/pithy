@@ -1,9 +1,11 @@
 package com.llthx.pithy;
 
+import com.llthx.llog.LLog;
 import com.llthx.pithy.event.PithyEventCallback;
 
 public class PithyPrototype {
     private String TAG;
+    private static final String PithyPrototype_TAG = "PithyPrototype";
 
     private String key;
 
@@ -16,6 +18,22 @@ public class PithyPrototype {
     public PithyPrototype(String TAG, String key, PithyEventCallback callback) {
         this.TAG = TAG;
         this.key = key;
+        this.callback = callback;
+        this.eventKey = generateEventKey(this.TAG, this.key);
+    }
+
+    public PithyPrototype(String eventKey, PithyEventCallback callback) throws Exception {
+        String[] strings = disassembleEventKey(eventKey);
+
+        if (null != strings) {
+            this.TAG = strings[0];
+            this.key = strings[1];
+        } else {
+            LLog.e(PithyPrototype_TAG,"eventKey not conform to the regulation!");
+
+            throw new Exception();
+        }
+
         this.callback = callback;
         this.eventKey = generateEventKey(this.TAG, this.key);
     }
@@ -46,6 +64,16 @@ public class PithyPrototype {
 
     public static String generateEventKey(String TAG, String key) {
         return TAG + PITHY_TAG + key;
+    }
+
+    public static String[] disassembleEventKey(String eventKey) {
+        if (eventKey.contains(PITHY_TAG)) {
+            return eventKey.split(PITHY_TAG);
+        } else {
+            LLog.e(PithyPrototype_TAG,"eventKey not conform to the regulation!");
+
+            return null;
+        }
     }
 
     public String getEventKey() {

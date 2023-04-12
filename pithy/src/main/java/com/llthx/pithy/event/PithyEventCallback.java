@@ -1,5 +1,7 @@
 package com.llthx.pithy.event;
 
+import org.json.JSONObject;
+
 public interface PithyEventCallback {
-    void  pithyEventCallback();
+    void  pithyEventCallback(String jsonData);
 }
