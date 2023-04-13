@@ -61,7 +61,7 @@ public enum PithyThread {
                 PithyPrototype pithyPrototype =(PithyPrototype) map.get(eventKey);
 
                 if (null != ThreadPool) {
-                    ThreadPool.execute(()-> pithyPrototype.getCallback().pithyEventCallback(jsonData));
+                    ThreadPool.execute(()-> pithyPrototype.getCallback().pithyEventCallback(eventKey, jsonData));
                 } else {
                     LLog.e(this.TAG,"post() , eventKey does not exist!");
                 }
@@ -193,7 +193,7 @@ public enum PithyThread {
             PithyPrototype pithyPrototype = (PithyPrototype) map.get(eventKey);
 
             if (null != handler) {
-                handler.post(()-> pithyPrototype.getCallback().pithyEventCallback(jsonData));
+                handler.post(()-> pithyPrototype.getCallback().pithyEventCallback(eventKey, jsonData));
             } else {
                 LLog.e(this.TAG,"post() , handler is null!");
             }

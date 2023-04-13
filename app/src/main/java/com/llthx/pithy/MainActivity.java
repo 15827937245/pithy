@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
     }
 
     @Override
-    public void pithyEventCallback(String jonsDate) {
+    public void pithyEventCallback(String eventKey, String jonsDate) {
         try {
             JSONObject data = new JSONObject(jonsDate);
             int onClickNumber = (int) data.get("onClickNumber");
