@@ -137,6 +137,16 @@ public enum PithyThread {
         return true;
     }
 
+    protected boolean isRegister(String TAG, String key) {
+        if (null != TAG && null != key) {
+            return map.containsKey(PithyPrototype.generateEventKey(TAG, key));
+        } else {
+            LLog.e(this.TAG,"isRegister(), TAG or key is null!");
+
+            return false;
+        }
+    }
+
     protected void removeAllEvent() {
         map.clear();
     }

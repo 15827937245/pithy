@@ -28,6 +28,9 @@ public class PithyClient {
         return mInstance;
     }
 
+    public boolean isRegister(String TAG, String key, PithyThread pithyThread) {
+        return isRegister(TAG, key, PithyThread.MAIN_THREAD);
+    }
 
     public boolean register(String TAG, String key, PithyEventCallback callback) {
         return register(TAG, key, callback, PithyThread.MAIN_THREAD);
