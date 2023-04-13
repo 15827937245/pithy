@@ -211,12 +211,16 @@ public class PithyClient {
     }
 
     public void post(String TAG, String key, String jsonData, PithyThread pithyThread){
+        pithyThread.post(TAG, key, jsonData, null);
+    }
+
+    public void post(String TAG, String key, String jsonData, PithyCallBack callBack, PithyThread pithyThread){
         if (!pithyThread.isInit()) {
             LLog.e(this.TAG,"post(), " + pithyThread.getPithyThreadName() + "is not init!");
 
             return;
         }
 
-        pithyThread.post(TAG, key, jsonData);
+        pithyThread.post(TAG, key, jsonData, callBack);
     }
 }

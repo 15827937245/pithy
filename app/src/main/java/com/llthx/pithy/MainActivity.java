@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PithyClient.getInstance().register(TAG,"testOnclick",this::pithyEventCallback);
+        PithyClient.getInstance().register(TAG,"testOnclick",this);
     }
 
     @Override
