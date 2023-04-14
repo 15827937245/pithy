@@ -136,7 +136,7 @@ public enum PithyThread {
                 ArrayList<PithySubscriptionPrototype> list = (ArrayList<PithySubscriptionPrototype>) map.get(key);
                 if (null != list && !list.isEmpty()) {
                     for (int i = 0; i < list.size(); i++) {
-                        list.get(i).getCallback().subscription(obj);
+                        list.get(i).getCallback().subscription(key, obj);
                     }
                 }
             });

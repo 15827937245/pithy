@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
     }
 
     @Override
-    public void subscription(Object obj) {
+    public void subscription(String string, Object obj) {
         runOnUiThread(()->
                 Toast.makeText(this,"pithyEventCallback, onClickNumber : " + obj,Toast.LENGTH_SHORT).show());
     }
