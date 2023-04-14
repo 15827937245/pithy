@@ -7,6 +7,7 @@ import android.os.Looper;
 import com.llthx.llog.LLog;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,6 +44,9 @@ public enum PithyThread {
     ASYNC_THREAD{
         private String TAG = "PithyThread_ASYNC_THREAD";
         private ThreadPoolExecutor ThreadPool;
+        private Map regeditMap = new HashMap<String, ArrayList<PithySubscriptionPrototype>>();
+        
+        private Object mLock = new Object();
 
         @Override
         public void init() {
@@ -73,6 +77,69 @@ public enum PithyThread {
         @Override
         public String getPithyThreadName() {
             return "ASYNC_THREAD";
+        }
+
+        @Override
+        protected void registerSubscription(PithySubscriptionPrototype prototype) {
+            synchronized (mLock) {
+                ArrayList<PithySubscriptionPrototype> list;
+                if (regeditMap.containsKey(prototype.getKey())) {
+                    list = (ArrayList<PithySubscriptionPrototype>) map.get(prototype.getKey());
+                    if (list != null){
+                        if (list.contains(prototype)) {
+                            return;
+                        }
+
+                        if (list.isEmpty()) {
+                            list.add(prototype);
+                        } else {
+                            for (int i = 0; i < list.size(); i++) {
+                                if (list.get(i).getPriority() < prototype.getPriority()) {
+                                    list.add(i,prototype);
+                                    break;
+                                }
+                            }
+
+                            if (prototype.getPriority() < list.get(list.size()-1).getPriority()) {
+                                list.add(prototype);
+                            }
+                        }
+                    }
+                } else {
+                    list = new ArrayList<>();
+                    list.add(prototype);
+                }
+
+                map.put(prototype.getKey(),list);
+            }
+        }
+
+        protected void unRegisterSubscription(PithySubscriptionPrototype prototype) {
+            synchronized (mLock) {
+                ArrayList<PithySubscriptionPrototype> list;
+                if (regeditMap.containsKey(prototype.getKey())) {
+                    list = (ArrayList<PithySubscriptionPrototype>) map.get(prototype.getKey());
+                    if (list != null && !list.isEmpty()){
+                        if (list.contains(prototype)) {
+                            list.remove(prototype);
+                            map.put(prototype.getKey(),list);
+                        }
+                    }
+                }
+
+                return;
+            }
+        }
+
+        protected void publish(String key ,Object obj) {
+            ThreadPool.execute(()-> {
+                ArrayList<PithySubscriptionPrototype> list = (ArrayList<PithySubscriptionPrototype>) map.get(key);
+                if (null != list && !list.isEmpty()) {
+                    for (int i = 0; i < list.size(); i++) {
+                        list.get(i).getCallback().subscription(obj);
+                    }
+                }
+            });
         }
     };
 
@@ -161,7 +228,7 @@ public enum PithyThread {
         }
 
         return strList;
-    };
+    }
 
     protected String[] dumpAllTagEvent(String TAG) {
         if (null == TAG) {
@@ -180,7 +247,7 @@ public enum PithyThread {
         }
 
         return (String[]) list.toArray();
-    };
+    }
 
     protected void post(String TAG, String key, String jsonData, PithyCallBack callBack) {
         LLog.d(this.TAG,"post , TAG : " + TAG + ", key : " + key);
@@ -210,9 +277,15 @@ public enum PithyThread {
         LLog.d(this.TAG,"init()");
 
         mbIsInit = true;
-    };
+    }
 
     public boolean isInit() {
         return mbIsInit;
     }
+
+    protected void registerSubscription(PithySubscriptionPrototype prototype){}
+
+    protected void unRegisterSubscription(PithySubscriptionPrototype prototype){}
+
+    protected void publish(String key ,Object obj){}
 }

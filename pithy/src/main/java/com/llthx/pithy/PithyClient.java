@@ -2,6 +2,7 @@ package com.llthx.pithy;
 
 import com.llthx.llog.LLog;
 import com.llthx.pithy.event.PithyEventCallback;
+import com.llthx.pithy.event.PithySubscriptionCallback;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -222,5 +223,41 @@ public class PithyClient {
         }
 
         pithyThread.post(TAG, key, jsonData, callBack);
+    }
+
+    public void registerSubscription(String key, PithySubscriptionCallback callback) {
+        registerSubscription(key, PithySubscriptionPrototype.PRIORITY_MID, callback);
+    }
+
+    public void registerSubscription(String key, int priority,PithySubscriptionCallback callback) {
+        registerSubscription(new PithySubscriptionPrototype(key, priority, callback));
+    }
+
+    public void registerSubscription(PithySubscriptionPrototype prototype) {
+        if (!PithyThread.ASYNC_THREAD.isInit()) {
+            PithyThread.ASYNC_THREAD.init();
+        }
+
+        PithyThread.ASYNC_THREAD.registerSubscription(prototype);
+    }
+
+    public void unRegisterSubscription(String key, PithySubscriptionCallback callback) {
+        unRegisterSubscription(key, PithySubscriptionPrototype.PRIORITY_MID, callback);
+    }
+
+    public void unRegisterSubscription(String key, int priority,PithySubscriptionCallback callback) {
+        unRegisterSubscription(new PithySubscriptionPrototype(key, priority, callback));
+    }
+
+    public void unRegisterSubscription(PithySubscriptionPrototype prototype) {
+        PithyThread.ASYNC_THREAD.unRegisterSubscription(prototype);
+    }
+
+    public void publish(String key, Object obj) {
+        if (!PithyThread.ASYNC_THREAD.isInit()) {
+            PithyThread.ASYNC_THREAD.init();
+        }
+
+        PithyThread.ASYNC_THREAD.publish(key, obj);
     }
 }

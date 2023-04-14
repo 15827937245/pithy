@@ -8,19 +8,22 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.llthx.pithy.event.PithyEventCallback;
+import com.llthx.pithy.event.PithySubscriptionCallback;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements PithyEventCallback {
+public class MainActivity extends AppCompatActivity implements PithyEventCallback , PithySubscriptionCallback {
     public String TAG = "MainActivity";
     public int onClickNumber = 0;
+    private final String key = "test";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PithyClient.getInstance().register(TAG,"testOnclick",this);
+        PithyClient.getInstance().registerSubscription(key,this::subscription);
     }
 
     @Override
@@ -28,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
         try {
             JSONObject data = new JSONObject(jonsDate);
             int onClickNumber = (int) data.get("onClickNumber");
-            Toast.makeText(this,"pithyEventCallback, onClickNumber : " + onClickNumber,Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this,"pithyEventCallback, onClickNumber : " + onClickNumber,Toast.LENGTH_SHORT).show();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
     public void testOnclick(View view) {
         Log.v(TAG,"testOnclick()");
         onClickNumber++;
+        PithyClient.getInstance().publish(key,onClickNumber);
+
         JSONObject jsonObject = new JSONObject();
 
         try {
@@ -53,5 +58,11 @@ public class MainActivity extends AppCompatActivity implements PithyEventCallbac
     protected void onDestroy() {
         super.onDestroy();
         PithyClient.getInstance().unRegister(TAG,"testOnclick");
+    }
+
+    @Override
+    public void subscription(Object obj) {
+        runOnUiThread(()->
+                Toast.makeText(this,"pithyEventCallback, onClickNumber : " + obj,Toast.LENGTH_SHORT).show());
     }
 }
